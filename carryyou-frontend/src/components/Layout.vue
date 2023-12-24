@@ -1,10 +1,10 @@
 <template>
   <div>
     <el-container>
-      <el-header style="padding: 0">
+      <el-header class="header">
         <HeaderBar></HeaderBar>
       </el-header>
-      <el-main>
+      <el-main class="main">
         <router-view/>
       </el-main>
     </el-container>
@@ -24,5 +24,7 @@ export default {
 </script>
 
 <style scoped>
-
+.header {
+  padding: 0;
+}
 </style>

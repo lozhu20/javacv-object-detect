@@ -22,10 +22,10 @@
     <el-table :data="userList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50"></el-table-column>
       <el-table-column type="index" width="50"></el-table-column>
-      <el-table-column prop="userId" label="用户id" width="200" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="userId" label="用户id" width="160" show-overflow-tooltip></el-table-column>
       <el-table-column prop="username" label="用户名" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="password" label="登陆密码" width="200" show-overflow-tooltip></el-table-column>
-      <el-table-column label="状态" width="200" show-overflow-tooltip>
+      <el-table-column prop="password" label="登陆密码" width="150" show-overflow-tooltip></el-table-column>
+      <el-table-column label="状态" width="130" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-select v-model="scope.row.status" disabled>
             <el-option v-for="status in statusList" :key="status.value" :value="status.value"
@@ -33,7 +33,7 @@
           </el-select>
         </template>
       </el-table-column>
-      <el-table-column label="角色" show-overflow-tooltip>
+      <el-table-column label="角色" width="130" show-overflow-tooltip>
         <template slot-scope="scope">
           <el-select v-model="scope.row.roleId" disabled>
             <el-option v-for="role in roleList" :key="role.value" :value="role.value" :label="role.label"></el-option>
@@ -54,7 +54,7 @@
       :total="page.total">
     </el-pagination>
 
-    <el-dialog title="新增用户" :visible.sync="addUserDialogVisible" width="50%"
+    <el-dialog title="新增用户" :visible.sync="addUserDialogVisible" width="40%"
                :before-close="beforeCloseAddUserDialog">
       <el-form ref="form" :model="userForm" label-width="80px" label-position="top">
         <el-form-item label="用户id">
@@ -87,7 +87,7 @@
       </el-form>
     </el-dialog>
 
-    <el-dialog title="编辑用户" :visible.sync="updateUserDialogVisible" width="50%"
+    <el-dialog title="编辑用户" :visible.sync="updateUserDialogVisible" width="40%"
                :before-close="beforeCloseUpdateUserDialog">
       <el-form ref="form" :model="updateForm" label-width="80px" label-position="top">
         <el-form-item label="用户id">

@@ -21,6 +21,11 @@ public class UserController {
     }
 
     @PostMapping("/user")
+    public Response<String> addUser(@RequestBody User user) {
+        return userService.addUser(user);
+    }
+
+    @PostMapping("/user/register")
     public Response<String> register(@RequestBody User user) {
         return userService.addUser(user);
     }

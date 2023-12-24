@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="single-page">
     <el-form ref="form" :model="userForm" label-width="80px" label-position="top">
       <el-form-item label="用户id">
         <el-input v-model="userForm.userId"></el-input>
@@ -14,8 +14,8 @@
         <el-input v-model="userForm.confirmPassword"></el-input>
       </el-form-item>
       <el-form-item label="">
-        <el-button type="primary" @click="register">注册</el-button>
-        <el-button @click="resetUserForm">重置</el-button>
+        <el-button type="primary" @click="register" icon="el-icon-check">注册</el-button>
+        <el-button @click="resetUserForm" icon="el-icon-refresh">重置</el-button>
       </el-form-item>
       <span>已有账号？直接 <el-link @click="toLogin">登陆</el-link></span>
     </el-form>
@@ -49,7 +49,7 @@ export default {
         this.$message.warning('两次密码不一致')
         return false
       }
-      this.axios.post('/api/user', this.userForm).then((res) => {
+      this.axios.post('/api/user/register', this.userForm).then((res) => {
         this.$message.success('注册成功，跳转登陆')
         setTimeout(() => {
           this.$router.push('/login')

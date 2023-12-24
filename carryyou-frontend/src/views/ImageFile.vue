@@ -21,7 +21,7 @@
     <el-table :data="imageList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="50"></el-table-column>
       <el-table-column prop="imageName" label="图片名称" show-overflow-tooltip></el-table-column>
-      <el-table-column prop="size" label="图片大小" width="120" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="size" label="图片大小" width="90" show-overflow-tooltip></el-table-column>
       <el-table-column prop="savePath" label="保存路径" show-overflow-tooltip></el-table-column>
       <el-table-column label="识别类型" width="130" show-overflow-tooltip>
         <template slot-scope="scope">
@@ -32,15 +32,15 @@
           </el-select>
         </template>
       </el-table-column>
-      <el-table-column prop="createdBy" label="上传人" width="180" show-overflow-tooltip></el-table-column>
+      <el-table-column prop="createdBy" label="上传人" width="150" show-overflow-tooltip></el-table-column>
       <el-table-column prop="createdTime" label="上传时间" width="180" show-overflow-tooltip></el-table-column>
-      <el-table-column label="操作" min-width="150">
+      <el-table-column label="操作" min-width="220">
         <template slot-scope="scope">
           <el-button type="primary" plain icon="el-icon-picture-outline" @click="downloadImage(scope.row.id, '1')">查看原图
           </el-button>
           <el-button type="primary" plain icon="el-icon-picture-outline" @click="downloadImage(scope.row.id, '2')"
                      :disabled="scope.row.detectSuccess !== 'Y'">
-            查看识别结果
+            查看结果
           </el-button>
         </template>
       </el-table-column>
@@ -185,10 +185,6 @@ export default {
       this.$message.warning('当前限制选择 1 个文件')
     },
     beforeUpload(file) {
-      if (!this.uploadForm.useAs) {
-        this.$message.warning('检测类型不能为空')
-        return false
-      }
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg'
       const isLt2M = file.size / 1024 / 1024 < 2
       if (!isJPG) {
@@ -200,6 +196,14 @@ export default {
       return isJPG && isLt2M
     },
     submitUpload() {
+      if (!this.uploadForm.useAs) {
+        this.$message.warning('检测类型不能为空')
+        return false
+      }
+      if (this.fileList.length === 0) {
+        this.$message.warning('请先选择图片')
+        return false
+      }
       this.$refs.upload.submit()
     },
     uploadSuccess() {

@@ -31,8 +31,8 @@
         <el-input v-model="myInfo.updatedTime" disabled></el-input>
       </el-form-item>
       <el-form-item label="">
-        <el-button type="primary" @click="updateUser">更新信息</el-button>
-        <el-button type="primary" @click="suspendMyAccount">注销账号</el-button>
+        <el-button type="primary" @click="updateUser" icon="el-icon-edit">更新信息</el-button>
+        <el-button type="danger" @click="suspendMyAccount" icon="el-icon-delete">注销账号</el-button>
       </el-form-item>
     </el-form>
   </div>

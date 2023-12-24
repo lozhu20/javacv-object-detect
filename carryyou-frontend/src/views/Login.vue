@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="single-page">
     <el-form ref="form" :model="loginForm" label-width="80px" label-position="top">
       <el-form-item label="用户id">
         <el-input v-model="loginForm.userId"></el-input>

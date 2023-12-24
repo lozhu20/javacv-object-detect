@@ -2,8 +2,8 @@
   <div>
     <el-menu :default-active="activeIndex" class="el-menu-demo" mode="horizontal"
              text-color="#555"
-             :router="true" style="padding: 0 30px">
-      <el-menu-item>Yolo目标检测</el-menu-item>
+             :router="true">
+      <el-menu-item id="homeMenu">Yolo 目标检测</el-menu-item>
       <template v-for="menu in menuList">
         <el-menu-item v-if="!menu.children" :index="menu.index">
           {{ menu.name }}
@@ -45,11 +45,17 @@ export default {
             }
           ]
         }, {
-          index: 'register',
-          name: '注册'
-        }, {
-          index: 'login',
-          name: '登陆'
+          index: 'bak',
+          name: '备用',
+          children: [
+            {
+              index: 'register',
+              name: '注册'
+            }, {
+              index: 'login',
+              name: '登陆'
+            }
+          ]
         }
       ]
     }
@@ -58,5 +64,7 @@ export default {
 </script>
 
 <style scoped>
-
+#homeMenu {
+  margin-left: calc((100% - 1180px) / 2);
+}
 </style>

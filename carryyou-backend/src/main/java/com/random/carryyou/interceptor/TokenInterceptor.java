@@ -15,6 +15,12 @@ public class TokenInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IllegalAccessException {
+
+        String requestURI = request.getRequestURI();
+        // 如果是注册/登陆请求，则放行
+        if (requestURI.contains("login") || requestURI.contains("register")) {
+            return true;
+        }
         String token = request.getHeader("token");
         if (TokenCacheUtil.CACHE_MAP.containsKey(token)) {
             return true;

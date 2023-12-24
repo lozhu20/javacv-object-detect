@@ -23,6 +23,10 @@ yolo:
   yolo-coconames-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/coco.names
   yolo-width: 608
   yolo-height: 608
+token:
+  expire:
+    after:
+      minutes: 15
 logging:
   level:
     com.random.carryyou.dao: debug

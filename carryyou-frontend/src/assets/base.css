@@ -1,0 +1,25 @@
+:root {
+  --body-width: 1180px;
+  --body-backgroud-color: rgb(245, 245, 245);
+  --content-background-color: #fff;
+  --border-radius: 8px;
+}
+
+.single-page {
+  background: var(--content-background-color);
+  width: var(--body-width);
+  padding: 25px;
+  margin-top: 25px;
+  margin-bottom: 35px;
+  border-radius: var(--border-radius);
+  margin-left: calc((100% - var(--body-width)) / 2);
+}
+
+.main {
+  width: var(--body-width);
+  margin-left: calc((100% - var(--body-width)) / 2);
+  margin-top: 25px;
+  margin-bottom: 35px;
+  border-radius: var(--border-radius);
+  background: var(--content-background-color);
+}

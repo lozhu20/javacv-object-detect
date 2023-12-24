@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.random.carryyou.dao.ImageMapper">
+
+    <resultMap id="BaseResultMap" type="com.random.carryyou.dto.Image">
+        <id property="id" column="id" jdbcType="VARCHAR"/>
+        <result property="imageName" column="image_name" jdbcType="VARCHAR"/>
+        <result property="size" column="size" jdbcType="INTEGER"/>
+        <result property="savePath" column="save_path" jdbcType="VARCHAR"/>
+        <result property="useAs" column="use_as" jdbcType="VARCHAR"/>
+        <result property="createdTime" column="created_time" jdbcType="TIMESTAMP"/>
+        <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+        <result property="updatedTime" column="updated_time" jdbcType="TIMESTAMP"/>
+        <result property="updatedBy" column="updated_by" jdbcType="VARCHAR"/>
+        <result property="useAsDescription" column="use_as_description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,image_name,size,
+        save_path,use_as,created_time,
+        created_by,updated_time,updated_by
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from tb_image
+        where id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <select id="selectByNameAndCreatedBy" resultMap="BaseResultMap">
+        select id,
+        image_name,
+        size,
+        save_path,
+        use_as,
+        case use_as
+        when '01' then '品种检测'
+        when '02' then '成熟度检测'
+        else '不支持的检测类型'
+        end as use_as_description,
+        created_time,
+        created_by,
+        updated_time,
+        updated_by
+        from tb_image
+        where 1 = 1
+        <if test="imageName != null and imageName != ''">
+            and image_name like concat('%', #{imageName}, '%')
+        </if>
+        <if test="createdBy != null and createdBy != ''">
+            and created_by = #{createdBy}
+        </if>
+        order by created_time desc
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.String">
+        delete
+        from tb_image
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.random.carryyou.dto.Image"
+            useGeneratedKeys="true">
+        insert into tb_image
+        ( id, image_name, size
+        , save_path, use_as, created_time
+        , created_by, updated_time, updated_by)
+        values ( #{id,jdbcType=VARCHAR}, #{imageName,jdbcType=VARCHAR}, #{size,jdbcType=INTEGER}
+               , #{savePath,jdbcType=VARCHAR}, #{useAs,jdbcType=VARCHAR}, #{createdTime,jdbcType=TIMESTAMP}
+               , #{createdBy,jdbcType=VARCHAR}, #{updatedTime,jdbcType=TIMESTAMP}, #{updatedBy,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.random.carryyou.dto.Image"
+            useGeneratedKeys="true">
+        insert into tb_image
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="imageName != null">image_name,</if>
+            <if test="size != null">size,</if>
+            <if test="savePath != null">save_path,</if>
+            <if test="useAs != null">use_as,</if>
+            <if test="createdTime != null">created_time,</if>
+            <if test="createdBy != null">created_by,</if>
+            <if test="updatedTime != null">updated_time,</if>
+            <if test="updatedBy != null">updated_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id,jdbcType=VARCHAR},</if>
+            <if test="imageName != null">#{imageName,jdbcType=VARCHAR},</if>
+            <if test="size != null">#{size,jdbcType=INTEGER},</if>
+            <if test="savePath != null">#{savePath,jdbcType=VARCHAR},</if>
+            <if test="useAs != null">#{useAs,jdbcType=VARCHAR},</if>
+            <if test="createdTime != null">#{createdTime,jdbcType=TIMESTAMP},</if>
+            <if test="createdBy != null">#{createdBy,jdbcType=VARCHAR},</if>
+            <if test="updatedTime != null">#{updatedTime,jdbcType=TIMESTAMP},</if>
+            <if test="updatedBy != null">#{updatedBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.random.carryyou.dto.Image">
+        update tb_image
+        <set>
+            <if test="imageName != null">
+                image_name = #{imageName,jdbcType=VARCHAR},
+            </if>
+            <if test="size != null">
+                size = #{size,jdbcType=INTEGER},
+            </if>
+            <if test="savePath != null">
+                save_path = #{savePath,jdbcType=VARCHAR},
+            </if>
+            <if test="useAs != null">
+                use_as = #{useAs,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy,jdbcType=VARCHAR},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.random.carryyou.dto.Image">
+        update tb_image
+        set image_name   = #{imageName,jdbcType=VARCHAR},
+            size         = #{size,jdbcType=INTEGER},
+            save_path    = #{savePath,jdbcType=VARCHAR},
+            use_as       = #{useAs,jdbcType=VARCHAR},
+            created_time = #{createdTime,jdbcType=TIMESTAMP},
+            created_by   = #{createdBy,jdbcType=VARCHAR},
+            updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+            updated_by   = #{updatedBy,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+    </update>
+</mapper>

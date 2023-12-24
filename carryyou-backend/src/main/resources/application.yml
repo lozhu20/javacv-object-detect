@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: carryyou-backend
+  datasource:
+    url: jdbc:postgresql://vm2:5432/db_carryyou
+    username: postgres
+    password: secret
+    driver-class-name: org.postgresql.Driver
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+server:
+  port: 8000
+image:
+  base:
+    path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/images/
+  detect:
+    suffix: _dec
+yolo:
+  yolo-cfg-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.cfg
+  yolo-weights-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.weights
+  yolo-coconames-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/coco.names
+  yolo-width: 608
+  yolo-height: 608
+logging:
+  level:
+    com.random.carryyou.dao: debug
+pagehelper:
+  helper-dialect: postgresql
+  reasonable: false
+  page-size-zero: false
+mybatis:
+  mapper-locations: classpath:**/*.xml

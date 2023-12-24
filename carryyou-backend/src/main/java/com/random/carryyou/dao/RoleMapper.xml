@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.random.carryyou.dao.RoleMapper">
+
+    <resultMap id="BaseResultMap" type="com.random.carryyou.dto.Role">
+            <id property="id" column="id" jdbcType="OTHER"/>
+            <result property="roleId" column="role_id" jdbcType="VARCHAR"/>
+            <result property="roleName" column="role_name" jdbcType="VARCHAR"/>
+            <result property="createdTime" column="created_time" jdbcType="TIMESTAMP"/>
+            <result property="createdBy" column="created_by" jdbcType="VARCHAR"/>
+            <result property="updatedTime" column="updated_time" jdbcType="TIMESTAMP"/>
+            <result property="updatedBy" column="updated_by" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id,role_id,role_name,
+        created_time,created_by,updated_time,
+        updated_by
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List" />
+        from tb_role
+        where  id = #{id,jdbcType=OTHER} 
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from tb_role
+        where  id = #{id,jdbcType=OTHER} 
+    </delete>
+    <insert id="insert" keyColumn="id" keyProperty="id" parameterType="com.random.carryyou.dto.Role" useGeneratedKeys="true">
+        insert into tb_role
+        ( id,role_id,role_name
+        ,created_time,created_by,updated_time
+        ,updated_by)
+        values (#{id,jdbcType=OTHER},#{roleId,jdbcType=VARCHAR},#{roleName,jdbcType=VARCHAR}
+        ,#{createdTime,jdbcType=TIMESTAMP},#{createdBy,jdbcType=VARCHAR},#{updatedTime,jdbcType=TIMESTAMP}
+        ,#{updatedBy,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertSelective" keyColumn="id" keyProperty="id" parameterType="com.random.carryyou.dto.Role" useGeneratedKeys="true">
+        insert into tb_role
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                <if test="id != null">id,</if>
+                <if test="roleId != null">role_id,</if>
+                <if test="roleName != null">role_name,</if>
+                <if test="createdTime != null">created_time,</if>
+                <if test="createdBy != null">created_by,</if>
+                <if test="updatedTime != null">updated_time,</if>
+                <if test="updatedBy != null">updated_by,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+                <if test="id != null">#{id,jdbcType=OTHER},</if>
+                <if test="roleId != null">#{roleId,jdbcType=VARCHAR},</if>
+                <if test="roleName != null">#{roleName,jdbcType=VARCHAR},</if>
+                <if test="createdTime != null">#{createdTime,jdbcType=TIMESTAMP},</if>
+                <if test="createdBy != null">#{createdBy,jdbcType=VARCHAR},</if>
+                <if test="updatedTime != null">#{updatedTime,jdbcType=TIMESTAMP},</if>
+                <if test="updatedBy != null">#{updatedBy,jdbcType=VARCHAR},</if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.random.carryyou.dto.Role">
+        update tb_role
+        <set>
+                <if test="roleId != null">
+                    role_id = #{roleId,jdbcType=VARCHAR},
+                </if>
+                <if test="roleName != null">
+                    role_name = #{roleName,jdbcType=VARCHAR},
+                </if>
+                <if test="createdTime != null">
+                    created_time = #{createdTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="createdBy != null">
+                    created_by = #{createdBy,jdbcType=VARCHAR},
+                </if>
+                <if test="updatedTime != null">
+                    updated_time = #{updatedTime,jdbcType=TIMESTAMP},
+                </if>
+                <if test="updatedBy != null">
+                    updated_by = #{updatedBy,jdbcType=VARCHAR},
+                </if>
+        </set>
+        where   id = #{id,jdbcType=OTHER} 
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.random.carryyou.dto.Role">
+        update tb_role
+        set 
+            role_id =  #{roleId,jdbcType=VARCHAR},
+            role_name =  #{roleName,jdbcType=VARCHAR},
+            created_time =  #{createdTime,jdbcType=TIMESTAMP},
+            created_by =  #{createdBy,jdbcType=VARCHAR},
+            updated_time =  #{updatedTime,jdbcType=TIMESTAMP},
+            updated_by =  #{updatedBy,jdbcType=VARCHAR}
+        where   id = #{id,jdbcType=OTHER} 
+    </update>
+</mapper>

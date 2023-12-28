@@ -147,6 +147,9 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>**/*.yml</include>
+                    <include>**/*.names</include>
+                    <include>**/*.cfg</include>
+                    <include>**/*.weights</include>
                 </includes>
             </resource>
         </resources>

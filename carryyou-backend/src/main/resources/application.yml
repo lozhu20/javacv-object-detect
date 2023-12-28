@@ -14,13 +14,13 @@ server:
   port: 8000
 image:
   base:
-    path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/images/
+    path: /data/images
   detect:
     suffix: _dec
 yolo:
-  yolo-cfg-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.cfg
-  yolo-weights-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.weights
-  yolo-coconames-path: /Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/coco.names
+  yolo-cfg-path: /data/yolov4.cfg
+  yolo-weights-path: /data/yolov4.weights
+  yolo-coconames-path: /data/coco.names
   yolo-width: 608
   yolo-height: 608
 token:

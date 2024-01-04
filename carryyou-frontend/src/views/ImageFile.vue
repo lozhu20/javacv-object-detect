@@ -61,8 +61,7 @@
       <el-form :inline="true" :model="uploadForm" class="demo-form-inline">
         <el-form-item label="检测类型">
           <el-select v-model="uploadForm.useAs">
-            <el-option v-for="useAs in useAsList" :key="useAs.value" :value="useAs.value"
-                       :label="useAs.label">
+            <el-option v-for="useAs in useAsList" :key="useAs.value" :value="useAs.value" :label="useAs.label">
             </el-option>
           </el-select>
         </el-form-item>
@@ -127,8 +126,7 @@ export default {
       },
       uploadDialogVisible: false,
       fileList: [],
-      imageDialogVisible: false,
-      imageSrc: '/Users/lozhu/Documents/projects/carryyou/carryyou-backend/images/2023/12/02/75f4a8d8-7dde-4e34-8cd5-4061be12cfcf.jpg'
+      imageDialogVisible: false
     }
   },
   created() {
@@ -185,22 +183,15 @@ export default {
       this.$message.warning('当前限制选择 1 个文件')
     },
     beforeUpload(file) {
-      const isJPG = file.type === 'image/jpeg' || file.type === 'image/jpg'
-      const isLt2M = file.size / 1024 / 1024 < 2
-      if (!isJPG) {
-        this.$message.error('上传头像图片只能是 JPG 格式')
-      }
-      if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB')
-      }
-      return isJPG && isLt2M
+      return true
     },
     submitUpload() {
       if (!this.uploadForm.useAs) {
         this.$message.warning('检测类型不能为空')
         return false
       }
-      if (this.fileList.length === 0) {
+      console.log('this.fileList: ', this.fileList)
+      if (this.$refs.upload.uploadFiles.length === 0) {
         this.$message.warning('请先选择图片')
         return false
       }

@@ -8,19 +8,26 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @Slf4j
 public class TokenInterceptor implements HandlerInterceptor {
+
+    private final List<String> WHITE_URI_LIST = Arrays.asList("login", "register", "download");
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws IllegalAccessException {
 
         String requestURI = request.getRequestURI();
         // 如果是注册/登陆请求，则放行
-        if (requestURI.contains("login") || requestURI.contains("register")) {
-            return true;
+        for (String uri : WHITE_URI_LIST) {
+            if (requestURI.contains(uri)) {
+                return true;
+            }
         }
+
         String token = request.getHeader("token");
         if (TokenCacheUtil.CACHE_MAP.containsKey(token)) {
             return true;

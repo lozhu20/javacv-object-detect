@@ -24,14 +24,14 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.file.Files;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Slf4j
 public class ImageServiceImpl implements ImageService {
+
+    private final List<String> IMAGE_FILE_EXTENSION_LIST = Arrays.asList(".jpg", ".jpeg");
+    private final List<String> VIDEO_FILE_EXTENSION_LIST = Arrays.asList(".mp4", ".avi");
 
     @Value("${image.base.path}")
     private String imageBasePath;
@@ -73,8 +73,14 @@ public class ImageServiceImpl implements ImageService {
         image.setUpdatedBy(currentUserId);
         imageMapper.insert(image);
 
-        // 检测图片
-        imageDetectService.detectImage(filePath);
+        // 根据文件类型分别检测
+        if (IMAGE_FILE_EXTENSION_LIST.contains(fileExtension)) {
+            imageDetectService.detectImage(filePath);
+        } else if (VIDEO_FILE_EXTENSION_LIST.contains(fileExtension)) {
+            imageDetectService.detectVideo(filePath);
+        } else {
+            log.warn("不支持检测的文件类型: {}", fileExtension);
+        }
 
         return ResponseUtil.success(null);
     }
@@ -95,7 +101,7 @@ public class ImageServiceImpl implements ImageService {
         calendar.setTime(new Date());
         int year = calendar.get(Calendar.YEAR);
         int month = calendar.get(Calendar.MONTH) + 1;
-        String dirPath = imageBasePath + year + File.separator + month + File.separator + subPath;
+        String dirPath = imageBasePath + File.separator + year + File.separator + month + File.separator + subPath;
         File fileDir = new File(dirPath);
         if (!fileDir.exists()) {
             fileDir.mkdirs();
@@ -115,7 +121,7 @@ public class ImageServiceImpl implements ImageService {
         File file;
         for (Image image : imageList) {
             String savePath = image.getSavePath();
-            file = new File(imageDetectService.transDetectImage(savePath));
+            file = new File(imageDetectService.transDetectFileName(savePath));
             if (file.exists()) {
                 image.setDetectSuccess("Y");
             } else {
@@ -135,8 +141,8 @@ public class ImageServiceImpl implements ImageService {
             fileName = image.getImageName();
             path = image.getSavePath();
         } else {
-            fileName = imageDetectService.transDetectImage(image.getImageName());
-            path = imageDetectService.transDetectImage(image.getSavePath());
+            fileName = imageDetectService.transDetectFileName(image.getImageName());
+            path = imageDetectService.transDetectFileName(image.getSavePath());
         }
 
         File file = new File(path);
@@ -178,7 +184,7 @@ public class ImageServiceImpl implements ImageService {
             }
         }
 
-        File decFile = new File(imageDetectService.transDetectImage(image.getSavePath()));
+        File decFile = new File(imageDetectService.transDetectFileName(image.getSavePath()));
         if (decFile.exists()) {
             try {
                 decFile.delete();

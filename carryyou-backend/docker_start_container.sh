@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "👷 start carryyou-backend docker container.."
+echo "🐳 start carryyou-backend docker container.."
 
 echo "🗑️ remove container if exists.."
 docker rm carryyou-backend

@@ -4,6 +4,8 @@ public interface ImageDetectService {
 
     void detectImage(String filePath);
 
-    String transDetectImage(String imageName);
+    void detectVideo(String filePath);
+
+    String transDetectFileName(String fileName);
 
 }

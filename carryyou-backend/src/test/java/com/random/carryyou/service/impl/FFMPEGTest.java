@@ -1,91 +1,144 @@
 package com.random.carryyou.service.impl;
 
+import cn.hutool.core.date.StopWatch;
 import com.random.carryyou.dto.ObjectDetectionResult;
-import com.random.carryyou.service.ImageDetectService;
-import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacpp.DoublePointer;
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Frame;
-import org.bytedeco.javacv.OpenCVFrameConverter;
+import org.bytedeco.javacv.*;
 import org.bytedeco.opencv.global.opencv_dnn;
 import org.bytedeco.opencv.opencv_core.*;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
+import javax.swing.*;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static org.bytedeco.opencv.global.opencv_core.*;
 import static org.bytedeco.opencv.global.opencv_dnn.*;
-import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 import static org.bytedeco.opencv.global.opencv_imgcodecs.imwrite;
 import static org.bytedeco.opencv.global.opencv_imgproc.*;
 import static org.opencv.imgproc.Imgproc.FONT_HERSHEY_SIMPLEX;
 
-@Service
-@Slf4j
-public class ImageDetectServiceImpl implements ImageDetectService {
+public class FFMPEGTest {
 
-    @Value("${image.detect.suffix}")
-    private String detectImageSuffix;
+    static String detectImageSuffix = "dec";
 
-    @Value("${yolo.yolo-cfg-path}")
-    private String cfgPath;
+    static String cfgPath = "/Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.cfg";
 
-    @Value("${yolo.yolo-weights-path}")
-    private String weightsPath;
+    static String weightsPath = "/Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/yolov4.weights";
 
-    @Value("${yolo.yolo-coconames-path}")
-    private String namesPath;
+    static String namesPath = "/Users/lozhu/Documents/projects/carryyou/carryyou-backend/src/main/resources/yolo/coco.names";
 
-    @Value("${yolo.yolo-width}")
-    private int width;
+    static int width = 608;
 
-    @Value("${yolo.yolo-height}")
-    private int height;
+    static int height = 608;
 
     /**
      * 置信度门限（超过这个值才认为是可信的推理结果）
      */
-    private static final float CONFIDENCE_THRESHOLD = 0.5F;
+    static final float CONFIDENCE_THRESHOLD = 0.5F;
 
-    private static final float NMS_THRESHOLD = 0.4F;
+    static final float NMS_THRESHOLD = 0.4F;
 
     // 神经网络
-    private Net net;
+    static Net net;
 
     // 输出层
-    private StringVector outNames;
+    static StringVector outNames;
 
     // 分类名称
-    private List<String> names;
+    static List<String> names;
 
-    @PostConstruct
-    private void init() throws Exception {
+    public static void main(String[] args) throws Exception {
+        test2();
+    }
 
+    public static void test1() throws Exception {
+        OpenCVFrameGrabber grabber = new OpenCVFrameGrabber(0);
+        grabber.start();
+
+        CanvasFrame canvasFrame = new CanvasFrame("摄像头预览");
+        canvasFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        while (canvasFrame.isDisplayable()) {
+            canvasFrame.showImage(grabber.grab());
+        }
+
+        grabber.close();
+    }
+
+    public static void test2() throws Exception {
+
+        FFMPEGTest test = new FFMPEGTest();
+
+        String videoPath = "//Users/lozhu/Documents/projects/carryyou/carryyou-backend/images/2024/1/01/2eba5d5d-91e4-46fd-9305-f8e6c862754b.mp4";
+        FileInputStream fileInputStream = new FileInputStream(videoPath);
+        FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(fileInputStream, 0);
+
+        grabber.start();
+        double frameRate = grabber.getFrameRate();
+
+//        CanvasFrame canvasFrame = new CanvasFrame("本地视频预览");
+//        canvasFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+//        canvasFrame.setResizable(true);
+
+        FFmpegFrameRecorder recorder = new FFmpegFrameRecorder("aa.mp4", grabber.getImageWidth(),
+                grabber.getImageHeight(), 0);
+        recorder.setFormat("mp4");
+        recorder.setVideoQuality(0);
+        recorder.setFrameRate(frameRate / 10);
+        recorder.start();
+
+        Frame frame = grabber.grabImage();
+        int frameNumber;
+        OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
+//        while (canvasFrame.isDisplayable()) {
+        while (frame != null) {
+//            if (frame == null) {
+//                break;
+//            }
+            frameNumber = grabber.getFrameNumber();
+//            canvasFrame.showImage(frame);
+            if (frameNumber % 10 == 0) {
+                Mat mat = converter.convertToMat(frame);
+                Mat mat1 = test.detectImage(mat);
+                Frame frame1 = converter.convert(mat1);
+                recorder.record(frame1);
+            }
+            Thread.sleep((long) (1000 / (frameRate * 2)));
+            frame = grabber.grabImage();
+        }
+
+        grabber.close();
+//        canvasFrame.dispose();
+        recorder.flush();
+        recorder.stop();
+    }
+
+    public Mat detectImage(Mat src) throws Exception {
+        StopWatch stopWatch = new StopWatch("目标检测耗时计时");
+        stopWatch.start("初始化神经网络");
         // 神经网络初始化
         net = readNetFromDarknet(cfgPath, weightsPath);
+        stopWatch.stop();
         // 检查网络是否为空
         if (net.empty()) {
-            log.error("神经网络初始化失败");
             throw new Exception("神经网络初始化失败");
         }
 
+        stopWatch.start("输出层");
         // 输出层
         outNames = net.getUnconnectedOutLayersNames();
+        stopWatch.stop();
 
         // 检查GPU
         if (getCudaEnabledDeviceCount() > 0) {
@@ -97,99 +150,103 @@ public class ImageDetectServiceImpl implements ImageDetectService {
         try {
             names = Files.readAllLines(Paths.get(namesPath));
         } catch (IOException e) {
-            log.error("获取分类名称失败，文件路径[{}]", namesPath, e);
         }
-    }
 
-    @Async
-    @Override
-    public void detectImage(String filePath) {
         // 读取文件到Mat
-        Mat src = imread(filePath);
-
-        Mat processedSrc = this.process(src);
-
-        // 将添加了标注的图片保持在磁盘上，并将图片信息写入map（给跳转页面使用）
-        // 新的图片文件名称
-        String newFilePath = this.transDetectFileName(filePath);
-
-        // 图片写到磁盘上
-        imwrite(newFilePath, processedSrc);
-    }
-
-    @Async
-    @Override
-    public void detectVideo(String videoPath) {
-        try {
-            FileInputStream fileInputStream = new FileInputStream(videoPath);
-            FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(fileInputStream, 0);
-
-            grabber.start();
-            double frameRate = grabber.getFrameRate();
-
-            FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(this.transDetectFileName(videoPath), grabber.getImageWidth(),
-                    grabber.getImageHeight(), 0);
-            recorder.setFormat("mp4");
-            recorder.setVideoQuality(0);
-            recorder.setFrameRate(frameRate / 10);
-            recorder.start();
-
-            Frame frame = grabber.grabImage();
-            int frameNumber;
-            OpenCVFrameConverter.ToMat converter = new OpenCVFrameConverter.ToMat();
-            while (frame != null) {
-                frameNumber = grabber.getFrameNumber();
-                if (frameNumber % 10 == 0) {
-                    Mat mat = converter.convertToMat(frame);
-                    Mat mat1 = this.process(mat);
-                    Frame frame1 = converter.convert(mat1);
-                    recorder.record(frame1);
-                }
-                Thread.sleep((long) (1000 / (frameRate * 2)));
-                frame = grabber.grabImage();
-            }
-
-            grabber.close();
-            recorder.flush();
-            recorder.stop();
-        } catch (Exception e) {
-            log.error("视频检测出错", e);
-        }
-    }
-
-    private Mat process(Mat src) {
+//        Mat src = imread(filePath);
 
         // 执行推理
+        stopWatch.start("执行推理");
         MatVector outs = doPredict(src);
+        stopWatch.stop();
 
         // 处理原始的推理结果，
         // 对检测到的每个目标，找出置信度最高的类别作为改目标的类别，
         // 还要找出每个目标的位置，这些信息都保存在ObjectDetectionResult对象中
+        stopWatch.start("处理原始的推理结果");
         List<ObjectDetectionResult> results = postprocess(src, outs);
+        stopWatch.stop();
 
         // 释放资源
         outs.releaseReference();
 
+        // 检测到的目标总数
+        int detectNum = results.size();
+
+        System.out.println("一共检测到 " + detectNum + " 个目标");
+
         // 计算出总耗时，并输出在图片的左上角
+        stopWatch.start("打印总耗时");
         printTimeUsed(src);
+        stopWatch.stop();
 
         // 将每一个被识别的对象在图片框出来，并在框的左上角标注该对象的类别
+        stopWatch.start("标注识别对象");
         markEveryDetectObject(src, results);
+        stopWatch.stop();
+
+        // 将添加了标注的图片保持在磁盘上，并将图片信息写入map（给跳转页面使用）
+//        saveMarkedImage(src, filePath);
+
+        System.out.println("图片检测结束");
+        String timeInfo = stopWatch.prettyPrint(TimeUnit.MILLISECONDS);
+        System.out.println(timeInfo);
 
         return src;
     }
 
-    /**
-     * 用神经网络执行推理
-     *
-     * @param src
-     * @return
-     */
+    private void printTimeUsed(Mat src) {
+        // 总次数
+        long totalNums = net.getPerfProfile(new DoublePointer());
+        // 频率
+        double freq = getTickFrequency() / 1000;
+        // 总次数除以频率就是总耗时
+        double t = totalNums / freq;
+
+        // 将本次检测的总耗时打印在展示图像的左上角
+        putText(src,
+                String.format("Inference time : %.2f ms", t),
+                new Point(10, 20),
+                FONT_HERSHEY_SIMPLEX,
+                0.6,
+                new Scalar(255, 0, 0, 0),
+                1,
+                LINE_AA,
+                false);
+    }
+
+    private void markEveryDetectObject(Mat src, List<ObjectDetectionResult> results) {
+        // 在图片上标出每个目标以及类别和置信度
+        for (ObjectDetectionResult result : results) {
+            System.out.println("类别[{" + result.getClassName() + "}]，置信度[{" + result.getConfidence() * 100f + "}%]");
+
+            // annotate on image
+            rectangle(src,
+                    new Point(result.getX(), result.getY()),
+                    new Point(result.getX() + result.getWidth(), result.getY() + result.getHeight()),
+                    Scalar.RED,
+                    1,
+                    LINE_4,
+                    0);
+
+            // 写在目标左上角的内容：类别+置信度
+            String label = result.getClassName() + ": " + String.format("%.2f%%", result.getConfidence() * 100f);
+
+            // 计算显示这些内容所需的高度
+            IntPointer baseLine = new IntPointer();
+
+            Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, baseLine);
+            int top = Math.max(result.getY(), labelSize.height());
+
+            // 添加内容到图片上
+            putText(src, label, new Point(result.getX(), top), FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0, 0), 1, LINE_4, false);
+        }
+    }
+
     private MatVector doPredict(Mat src) {
         // 将图片转为四维blog，并且对尺寸做调整
         Mat inputBlob = blobFromImage(src,
                 1 / 255.0,
-//                src.size(),
                 new Size(width, height),
                 new Scalar(0.0),
                 true,
@@ -211,13 +268,6 @@ public class ImageDetectServiceImpl implements ImageDetectService {
         return outs;
     }
 
-    /**
-     * 推理完成后的操作
-     *
-     * @param frame
-     * @param outs
-     * @return
-     */
     private List<ObjectDetectionResult> postprocess(Mat frame, MatVector outs) {
         final IntVector classIds = new IntVector();
         final FloatVector confidences = new FloatVector();
@@ -311,72 +361,5 @@ public class ImageDetectServiceImpl implements ImageDetectService {
         boxes.releaseReference();
 
         return detections;
-    }
-
-    /**
-     * 计算出总耗时，并输出在图片的左上角
-     *
-     * @param src 图片
-     */
-    private void printTimeUsed(Mat src) {
-        // 总次数
-        long totalNums = net.getPerfProfile(new DoublePointer());
-        // 频率
-        double freq = getTickFrequency() / 1000;
-        // 总次数除以频率就是总耗时
-        double t = totalNums / freq;
-
-        // 将本次检测的总耗时打印在展示图像的左上角
-        putText(src,
-                String.format("Inference time : %.2f ms", t),
-                new Point(10, 20),
-                FONT_HERSHEY_SIMPLEX,
-                0.6,
-                new Scalar(255, 0, 0, 0),
-                1,
-                LINE_AA,
-                false);
-    }
-
-    /**
-     * 将每一个被识别的对象在图片框出来，并在框的左上角标注该对象的类别
-     *
-     * @param src     图片
-     * @param results 结果
-     */
-    private void markEveryDetectObject(Mat src, List<ObjectDetectionResult> results) {
-        // 在图片上标出每个目标以及类别和置信度
-        for (ObjectDetectionResult result : results) {
-            log.info("类别[{}]，置信度[{}%]", result.getClassName(), result.getConfidence() * 100f);
-
-            // annotate on image
-            rectangle(src,
-                    new Point(result.getX(), result.getY()),
-                    new Point(result.getX() + result.getWidth(), result.getY() + result.getHeight()),
-                    Scalar.RED,
-                    1,
-                    LINE_4,
-                    0);
-
-            // 写在目标左上角的内容：类别+置信度
-            String label = result.getClassName() + ": " + String.format("%.2f%%", result.getConfidence() * 100f);
-
-            // 计算显示这些内容所需的高度
-            IntPointer baseLine = new IntPointer();
-
-            Size labelSize = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.5, 1, baseLine);
-            int top = Math.max(result.getY(), labelSize.height());
-
-            // 添加内容到图片上
-            putText(src, label, new Point(result.getX(), top), FONT_HERSHEY_SIMPLEX, 0.5, new Scalar(0, 255, 0, 0), 1, LINE_4, false);
-        }
-    }
-
-    @Override
-    public String transDetectFileName(String fileName) {
-        int index = fileName.lastIndexOf(".");
-        String newFileName = fileName.substring(0, index);
-        String fileExtension = fileName.substring(index);
-        return newFileName + detectImageSuffix + fileExtension;
     }
 }
